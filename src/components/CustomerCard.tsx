@@ -1,5 +1,29 @@
 import { Link } from "@tanstack/react-router";
 import { inisial, type Customer } from "@/lib/types";
+import { useState } from "react";
+
+// Komponen pembantu untuk menangani loading gambar dengan aman
+function CustomerImage({ url, nama }: { url: string | null | undefined; nama: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!url || hasError) {
+    return <>{inisial(nama)}</>;
+  }
+
+  // Jika URL tidak dimulai dengan http, tambahkan base URL Supabase
+  const fullUrl = url.startsWith("http") 
+    ? url 
+    : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product-images/${url}`;
+
+  return (
+    <img 
+      src={fullUrl} 
+      alt={nama} 
+      className="size-full object-cover"
+      onError={() => setHasError(true)} 
+    />
+  );
+}
 
 export function CustomerCard({ customer }: { customer: Customer }) {
   return (
@@ -9,11 +33,7 @@ export function CustomerCard({ customer }: { customer: Customer }) {
       className="w-32 flex-shrink-0 rounded-2xl border border-border bg-surface p-4 shadow-card transition-transform active:scale-[0.98]"
     >
       <div className="mb-3 flex size-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 font-bold text-primary">
-        {customer.logoUrl ? (
-          <img src={customer.logoUrl} alt={customer.nama} className="size-full object-cover" />
-        ) : (
-          inisial(customer.nama)
-        )}
+        <CustomerImage url={customer.logoUrl} nama={customer.nama} />
       </div>
       <div className="truncate text-sm font-bold">{customer.nama}</div>
       <div className="text-[10px] text-muted-foreground">{customer.kode}</div>
@@ -29,11 +49,7 @@ export function CustomerRow({ customer }: { customer: Customer }) {
       className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card transition-transform active:scale-[0.99]"
     >
       <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-sm font-bold text-primary">
-        {customer.logoUrl ? (
-          <img src={customer.logoUrl} alt={customer.nama} className="size-full object-cover" />
-        ) : (
-          inisial(customer.nama)
-        )}
+        <CustomerImage url={customer.logoUrl} nama={customer.nama} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-bold">{customer.nama}</div>
