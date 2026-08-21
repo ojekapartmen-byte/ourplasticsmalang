@@ -111,3 +111,28 @@ export function useOrderMutations(customerId: string) {
 export function DataProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
+
+// Fungsi untuk mengisi data contoh (Demo Data) menggunakan Server Function
+export async function seedDemoData() {
+  try {
+    await createCustomer({
+      data: {
+        nama: "Toko Plastik Makmur",
+        kode: "CUST-001",
+        alamat: "Jl. Pasar Besar No. 12",
+        no_hp: "081122334455",
+      },
+    });
+
+    await createCustomer({
+      data: {
+        nama: "Budi Santoso",
+        kode: "CUST-002",
+        alamat: "Jl. Melati No. 45",
+        no_hp: "089988776655",
+      },
+    });
+  } catch (error: any) {
+    throw new Error(error.message || "Gagal mengisi data contoh");
+  }
+}
