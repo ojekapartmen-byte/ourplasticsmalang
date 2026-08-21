@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   listCustomers,
   getCustomer,
@@ -13,134 +14,96 @@ import {
   updateOrder,
   deleteOrder,
 } from "./orders.functions";
-import { deleteProductImage } from "./storage";
 import type { Customer, Order } from "./types";
 
-const customersKey = ["customers"] as const;
-const ordersKey = (customerId: string) => ["orders", customerId] as const;
+export const customersKey = ["customers"] as const;
+export const customerKey = (id: string) => ["customer", id] as const;
+export const ordersKey = (customerId: string) => ["orders", customerId] as const;
+export const searchKey = (q: string) => ["search", q] as const;
 
-export function useData() {
-  const queryClient = useQueryClient();
-
-  const customersQuery = useQuery({
+export function useCustomers() {
+  const fetchCustomers = useServerFn(listCustomers);
+  return useSuspenseQuery({
     queryKey: customersKey,
-    queryFn: () => listCustomers(),
+    queryFn: () => fetchCustomers(),
   });
+}
 
-  const customers = (customersQuery.data ?? []) as Customer[];
+export function useCustomer(id: string) {
+  const fetchCustomer = useServerFn(getCustomer);
+  return useQuery({
+    queryKey: customerKey(id),
+    queryFn: () => fetchCustomer({ data: { id } }),
+    enabled: !!id,
+  });
+}
 
-  const createCustomerMutation = useMutation({
-    mutationFn: createCustomer,
+export function useSearchCustomers(q: string) {
+  const fetchSearch = useServerFn(searchCustomers);
+  return useQuery({
+    queryKey: searchKey(q),
+    queryFn: () => fetchSearch({ data: { q } }),
+    enabled: q.trim().length > 0,
+  });
+}
+
+export function useOrders(customerId: string) {
+  const fetchOrders = useServerFn(listOrdersByCustomer);
+  return useQuery({
+    queryKey: ordersKey(customerId),
+    queryFn: () => fetchOrders({ data: { customerId } }),
+    enabled: !!customerId,
+  });
+}
+
+export function useCustomerMutations() {
+  const queryClient = useQueryClient();
+  const createFn = useServerFn(createCustomer);
+  const updateFn = useServerFn(updateCustomer);
+  const deleteFn = useServerFn(deleteCustomer);
+
+  const create = useMutation({
+    mutationFn: (data: Omit<Customer, "id" | "sejak">) => createFn({ data }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: customersKey }),
   });
 
-  const updateCustomerMutation = useMutation({
-    mutationFn: updateCustomer,
+  const update = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Omit<Customer, "id" | "sejak"> }) =>
+      updateFn({ data: { id, data } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: customersKey }),
   });
 
-  const deleteCustomerMutation = useMutation({
-    mutationFn: deleteCustomer,
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteFn({ data: { id } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: customersKey }),
   });
 
-  const createOrderMutation = useMutation({
-    mutationFn: createOrder,
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ordersKey(vars.customerId) });
-    },
+  return { create, update, remove };
+}
+
+export function useOrderMutations(customerId: string) {
+  const queryClient = useQueryClient();
+  const createFn = useServerFn(createOrder);
+  const updateFn = useServerFn(updateOrder);
+  const deleteFn = useServerFn(deleteOrder);
+
+  const create = useMutation({
+    mutationFn: (data: Omit<Order, "id" | "tanggal">) => createFn({ data }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ordersKey(customerId) }),
   });
 
-  const updateOrderMutation = useMutation({
-    mutationFn: updateOrder,
-    onSuccess: async (_, vars) => {
-      const order = queryClient.getQueryData<Order[]>(ordersKey(""));
-      const customerId = order?.find((o) => o.id === vars.id)?.customerId;
-      if (customerId) {
-        queryClient.invalidateQueries({ queryKey: ordersKey(customerId) });
-      }
-    },
+  const update = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Omit<Order, "id" | "tanggal" | "customerId"> }) =>
+      updateFn({ data: { id, data } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ordersKey(customerId) }),
   });
 
-  const deleteOrderMutation = useMutation({
-    mutationFn: deleteOrder,
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteFn({ data: { id } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ordersKey(customerId) }),
   });
 
-  const getCustomer = (id: string) => customers.find((c) => c.id === id);
-
-  const ordersOf = (customerId: string) => {
-    const query = useQuery({
-      queryKey: ordersKey(customerId),
-      queryFn: () => listOrdersByCustomer({ data: { customerId } }),
-      enabled: !!customerId,
-    });
-    return query.data ?? [];
-  };
-
-  const addCustomer = async (data: Omit<Customer, "id" | "sejak">) => {
-    const created = await createCustomerMutation.mutateAsync(data);
-    return created;
-  };
-
-  const updateCustomerFn = async (id: string, data: Omit<Customer, "id" | "sejak">) => {
-    await updateCustomerMutation.mutateAsync({ data: { id, data } });
-  };
-
-  const deleteCustomerFn = async (id: string) => {
-    await deleteCustomerMutation.mutateAsync({ data: { id } });
-  };
-
-  const addOrder = async (data: Omit<Order, "id" | "tanggal">) => {
-    await createOrderMutation.mutateAsync({
-      data: {
-        customerId: data.customerId,
-        namaProduk: data.namaProduk,
-        jumlah: data.jumlah,
-        satuan: data.satuan,
-        harga: data.harga,
-        status: data.status,
-        imageUrl: data.imageUrl,
-      },
-    });
-  };
-
-  const updateOrderFn = async (id: string, data: Omit<Order, "id" | "tanggal" | "customerId">) => {
-    await updateOrderMutation.mutateAsync({
-      data: {
-        id,
-        data: {
-          namaProduk: data.namaProduk,
-          jumlah: data.jumlah,
-          satuan: data.satuan,
-          harga: data.harga,
-          status: data.status,
-          imageUrl: data.imageUrl,
-        },
-      },
-    });
-  };
-
-  const deleteOrderFn = async (id: string) => {
-    await deleteOrderMutation.mutateAsync({ data: { id } });
-  };
-
-  const search = async (q: string) => {
-    if (!q.trim()) return [] as Customer[];
-    return searchCustomers({ data: { q } });
-  };
-
-  return {
-    customers,
-    ordersOf,
-    getCustomer,
-    addCustomer,
-    updateCustomer: updateCustomerFn,
-    deleteCustomer: deleteCustomerFn,
-    addOrder,
-    updateOrder: updateOrderFn,
-    deleteOrder: deleteOrderFn,
-    search,
-  };
+  return { create, update, remove };
 }
 
 // Provider tidak lagi dibutuhkan; komponen lama yang mengimport DataProvider
