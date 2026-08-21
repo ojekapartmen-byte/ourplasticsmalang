@@ -10,6 +10,8 @@ const toCustomer = (row: {
   alamat: string;
   no_hp: string;
   created_at: string;
+  logo_url: string | null;
+  logo_path: string | null;
 }): Customer => ({
   id: row.id,
   nama: row.nama,
@@ -17,6 +19,8 @@ const toCustomer = (row: {
   alamat: row.alamat,
   noHp: row.no_hp,
   sejak: new Date(row.created_at).toLocaleDateString("id-ID", { month: "short", year: "numeric" }),
+  logoUrl: row.logo_url,
+  logoPath: row.logo_path,
 });
 
 const customerSchema = z.object({
@@ -24,6 +28,8 @@ const customerSchema = z.object({
   kode: z.string().min(1),
   alamat: z.string().default(""),
   noHp: z.string().default(""),
+  logoUrl: z.string().nullable().optional(),
+  logoPath: z.string().nullable().optional(),
 });
 
 export const listCustomers = createServerFn({ method: "GET" })
@@ -31,7 +37,7 @@ export const listCustomers = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("customers")
-      .select("id, nama, kode, alamat, no_hp, created_at")
+      .select("id, nama, kode, alamat, no_hp, created_at, logo_url, logo_path")
       .order("created_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map(toCustomer);
@@ -43,7 +49,7 @@ export const getCustomer = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("customers")
-      .select("id, nama, kode, alamat, no_hp, created_at")
+      .select("id, nama, kode, alamat, no_hp, created_at, logo_url, logo_path")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw error;
@@ -57,6 +63,8 @@ function toCustomerInsert(data: z.infer<typeof customerSchema>, userId: string) 
     kode: data.kode,
     alamat: data.alamat,
     no_hp: data.noHp,
+    logo_url: data.logoUrl,
+    logo_path: data.logoPath,
     user_id: userId,
   };
 }
@@ -68,7 +76,7 @@ export const createCustomer = createServerFn({ method: "POST" })
     const { data: row, error } = await context.supabase
       .from("customers")
       .insert(toCustomerInsert(data, context.userId))
-      .select("id, nama, kode, alamat, no_hp, created_at")
+      .select("id, nama, kode, alamat, no_hp, created_at, logo_url, logo_path")
       .single();
     if (error) throw error;
     return toCustomer(row);
@@ -87,10 +95,12 @@ export const updateCustomer = createServerFn({ method: "POST" })
         kode: data.data.kode,
         alamat: data.data.alamat,
         no_hp: data.data.noHp,
+        logo_url: data.data.logoUrl,
+        logo_path: data.data.logoPath,
       })
       .eq("id", data.id)
       .eq("user_id", context.userId)
-      .select("id, nama, kode, alamat, no_hp, created_at")
+      .select("id, nama, kode, alamat, no_hp, created_at, logo_url, logo_path")
       .single();
     if (error) throw error;
     return toCustomer(row);
@@ -119,7 +129,7 @@ export const searchCustomers = createServerFn({ method: "GET" })
     const [{ data: customers }, { data: orders }] = await Promise.all([
       context.supabase
         .from("customers")
-        .select("id, nama, kode, alamat, no_hp, created_at")
+        .select("id, nama, kode, alamat, no_hp, created_at, logo_url, logo_path")
         .or(`nama.ilike.%${term}%,kode.ilike.%${term}%,alamat.ilike.%${term}%,no_hp.ilike.%${term}%`),
       context.supabase.from("orders").select("customer_id, nama_produk").ilike("nama_produk", `%${term}%`),
     ]);
