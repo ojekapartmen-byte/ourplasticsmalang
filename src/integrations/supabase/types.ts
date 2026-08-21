@@ -14,7 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          alamat: string
+          created_at: string
+          id: string
+          kode: string
+          nama: string
+          no_hp: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alamat?: string
+          created_at?: string
+          id?: string
+          kode: string
+          nama: string
+          no_hp?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alamat?: string
+          created_at?: string
+          id?: string
+          kode?: string
+          nama?: string
+          no_hp?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          harga: number
+          id: string
+          image_url: string | null
+          jumlah: number
+          nama_produk: string
+          satuan: string
+          status: string
+          tanggal: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          harga?: number
+          id?: string
+          image_url?: string | null
+          jumlah?: number
+          nama_produk: string
+          satuan?: string
+          status?: string
+          tanggal?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          harga?: number
+          id?: string
+          image_url?: string | null
+          jumlah?: number
+          nama_produk?: string
+          satuan?: string
+          status?: string
+          tanggal?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
