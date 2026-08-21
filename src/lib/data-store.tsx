@@ -1,117 +1,150 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { mockCustomers, mockOrders } from "./mock-data";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  listCustomers,
+  getCustomer,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
+  searchCustomers,
+} from "./customers.functions";
+import {
+  listOrdersByCustomer,
+  createOrder,
+  updateOrder,
+  deleteOrder,
+} from "./orders.functions";
+import { deleteProductImage } from "./storage";
 import type { Customer, Order } from "./types";
 
-type DataStore = {
-  customers: Customer[];
-  orders: Order[];
-  getCustomer: (id: string) => Customer | undefined;
-  ordersOf: (customerId: string) => Order[];
-  addCustomer: (data: Omit<Customer, "id" | "sejak">) => Customer;
-  updateCustomer: (id: string, data: Omit<Customer, "id" | "sejak">) => void;
-  deleteCustomer: (id: string) => void;
-  addOrder: (data: Omit<Order, "id" | "tanggal">) => void;
-  updateOrder: (id: string, data: Omit<Order, "id" | "tanggal" | "customerId">) => void;
-  deleteOrder: (id: string) => void;
-  search: (q: string) => Customer[];
-};
-
-const Ctx = createContext<DataStore | null>(null);
-
-const tanggalHariIni = () =>
-  new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
-
-export function DataProvider({ children }: { children: ReactNode }) {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-
-  const getCustomer = useCallback((id: string) => customers.find((c) => c.id === id), [customers]);
-  const ordersOf = useCallback(
-    (customerId: string) => orders.filter((o) => o.customerId === customerId),
-    [orders],
-  );
-
-  const addCustomer = useCallback((data: Omit<Customer, "id" | "sejak">) => {
-    const created: Customer = { ...data, id: `c${Date.now()}`, sejak: tanggalHariIni() };
-    setCustomers((prev) => [created, ...prev]);
-    return created;
-  }, []);
-
-  const updateCustomer = useCallback((id: string, data: Omit<Customer, "id" | "sejak">) => {
-    setCustomers((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)));
-  }, []);
-
-  const deleteCustomer = useCallback((id: string) => {
-    setCustomers((prev) => prev.filter((c) => c.id !== id));
-    setOrders((prev) => prev.filter((o) => o.customerId !== id));
-  }, []);
-
-  const addOrder = useCallback((data: Omit<Order, "id" | "tanggal">) => {
-    setOrders((prev) => [{ ...data, id: `o${Date.now()}`, tanggal: tanggalHariIni() }, ...prev]);
-  }, []);
-
-  const updateOrder = useCallback(
-    (id: string, data: Omit<Order, "id" | "tanggal" | "customerId">) => {
-      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...data } : o)));
-    },
-    [],
-  );
-
-  const deleteOrder = useCallback((id: string) => {
-    setOrders((prev) => prev.filter((o) => o.id !== id));
-  }, []);
-
-  const search = useCallback(
-    (q: string) => {
-      const term = q.trim().toLowerCase();
-      if (!term) return [];
-      return customers.filter((c) => {
-        const cocokCustomer = [c.nama, c.kode, c.alamat, c.noHp].some((f) =>
-          f.toLowerCase().includes(term),
-        );
-        const cocokProduk = orders.some(
-          (o) => o.customerId === c.id && o.namaProduk.toLowerCase().includes(term),
-        );
-        return cocokCustomer || cocokProduk;
-      });
-    },
-    [customers, orders],
-  );
-
-  const value = useMemo(
-    () => ({
-      customers,
-      orders,
-      getCustomer,
-      ordersOf,
-      addCustomer,
-      updateCustomer,
-      deleteCustomer,
-      addOrder,
-      updateOrder,
-      deleteOrder,
-      search,
-    }),
-    [
-      customers,
-      orders,
-      getCustomer,
-      ordersOf,
-      addCustomer,
-      updateCustomer,
-      deleteCustomer,
-      addOrder,
-      updateOrder,
-      deleteOrder,
-      search,
-    ],
-  );
-
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
-}
+const customersKey = ["customers"] as const;
+const ordersKey = (customerId: string) => ["orders", customerId] as const;
 
 export function useData() {
-  const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useData harus dipakai di dalam DataProvider");
-  return ctx;
+  const queryClient = useQueryClient();
+
+  const customersQuery = useQuery({
+    queryKey: customersKey,
+    queryFn: () => listCustomers(),
+  });
+
+  const customers = (customersQuery.data ?? []) as Customer[];
+
+  const createCustomerMutation = useMutation({
+    mutationFn: createCustomer,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: customersKey }),
+  });
+
+  const updateCustomerMutation = useMutation({
+    mutationFn: updateCustomer,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: customersKey }),
+  });
+
+  const deleteCustomerMutation = useMutation({
+    mutationFn: deleteCustomer,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: customersKey }),
+  });
+
+  const createOrderMutation = useMutation({
+    mutationFn: createOrder,
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ordersKey(vars.customerId) });
+    },
+  });
+
+  const updateOrderMutation = useMutation({
+    mutationFn: updateOrder,
+    onSuccess: async (_, vars) => {
+      const order = queryClient.getQueryData<Order[]>(ordersKey(""));
+      const customerId = order?.find((o) => o.id === vars.id)?.customerId;
+      if (customerId) {
+        queryClient.invalidateQueries({ queryKey: ordersKey(customerId) });
+      }
+    },
+  });
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: deleteOrder,
+  });
+
+  const getCustomer = (id: string) => customers.find((c) => c.id === id);
+
+  const ordersOf = (customerId: string) => {
+    const query = useQuery({
+      queryKey: ordersKey(customerId),
+      queryFn: () => listOrdersByCustomer({ data: { customerId } }),
+      enabled: !!customerId,
+    });
+    return query.data ?? [];
+  };
+
+  const addCustomer = async (data: Omit<Customer, "id" | "sejak">) => {
+    const created = await createCustomerMutation.mutateAsync(data);
+    return created;
+  };
+
+  const updateCustomerFn = async (id: string, data: Omit<Customer, "id" | "sejak">) => {
+    await updateCustomerMutation.mutateAsync({ data: { id, data } });
+  };
+
+  const deleteCustomerFn = async (id: string) => {
+    await deleteCustomerMutation.mutateAsync({ data: { id } });
+  };
+
+  const addOrder = async (data: Omit<Order, "id" | "tanggal">) => {
+    await createOrderMutation.mutateAsync({
+      data: {
+        customerId: data.customerId,
+        namaProduk: data.namaProduk,
+        jumlah: data.jumlah,
+        satuan: data.satuan,
+        harga: data.harga,
+        status: data.status,
+        imageUrl: data.imageUrl,
+      },
+    });
+  };
+
+  const updateOrderFn = async (id: string, data: Omit<Order, "id" | "tanggal" | "customerId">) => {
+    await updateOrderMutation.mutateAsync({
+      data: {
+        id,
+        data: {
+          namaProduk: data.namaProduk,
+          jumlah: data.jumlah,
+          satuan: data.satuan,
+          harga: data.harga,
+          status: data.status,
+          imageUrl: data.imageUrl,
+        },
+      },
+    });
+  };
+
+  const deleteOrderFn = async (id: string) => {
+    await deleteOrderMutation.mutateAsync({ data: { id } });
+  };
+
+  const search = async (q: string) => {
+    if (!q.trim()) return [] as Customer[];
+    return searchCustomers({ data: { q } });
+  };
+
+  return {
+    customers,
+    ordersOf,
+    getCustomer,
+    addCustomer,
+    updateCustomer: updateCustomerFn,
+    deleteCustomer: deleteCustomerFn,
+    addOrder,
+    updateOrder: updateOrderFn,
+    deleteOrder: deleteOrderFn,
+    search,
+  };
+}
+
+// Provider tidak lagi dibutuhkan; komponen lama yang mengimport DataProvider
+// tetap bisa dipakai sebagai no-op wrapper agar tidak rusak.
+export function DataProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
