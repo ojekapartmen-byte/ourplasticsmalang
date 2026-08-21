@@ -7,7 +7,7 @@ import { CustomerForm } from "@/components/CustomerForm";
 import { Sheet } from "@/components/Sheet";
 import { useCustomers, useCustomerMutations, useSearchCustomers, seedDemoData } from "@/lib/data-store";
 import type { Customer } from "@/lib/types";
-import { supabase } from "@/lib/supabase"; // Pastikan path ini sesuai dengan lokasi file supabase kamu
+import { supabase } from "@/integrations/supabase/client"; // Path sudah diperbaiki
 import toast, { Toaster } from "react-hot-toast";
 
 export const Route = createFileRoute("/_authenticated/")({
