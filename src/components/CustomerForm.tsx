@@ -37,10 +37,12 @@ export function CustomerForm({ initial, onSubmit, onCancel }: Props) {
     try {
       setUploading(true);
       const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36.substring(2))}.${fileExt}`;
+      // PERBAIKAN: Mengubah string(36).substring(2) dengan benar agar tidak error
+      const randomString = Math.random().toString(36).substring(2);
+      const fileName = `${Date.now()}_${randomString}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // Mengunggah file ke storage bucket (menggunakan bucket standar "product-images")
+      // Mengunggah file ke storage bucket "product-images"
       const { error: uploadError } = await supabase.storage
         .from("product-images")
         .upload(filePath, file);
