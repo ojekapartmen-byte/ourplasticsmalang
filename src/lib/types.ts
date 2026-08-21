@@ -12,7 +12,7 @@ export type Order = {
   status: StatusPembayaran;
   tanggal: string;
   imageUrl: string | null;
-  imagePath: string | null;
+  imagePath?: string | null;
 };
 
 export type Customer = {
