@@ -51,13 +51,23 @@ export const getCustomer = createServerFn({ method: "GET" })
     return toCustomer(row);
   });
 
+function toCustomerInsert(data: z.infer<typeof customerSchema>, userId: string) {
+  return {
+    nama: data.nama,
+    kode: data.kode,
+    alamat: data.alamat,
+    no_hp: data.noHp,
+    user_id: userId,
+  };
+}
+
 export const createCustomer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => customerSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("customers")
-      .insert({ ...data, user_id: context.userId })
+      .insert(toCustomerInsert(data, context.userId))
       .select("id, nama, kode, alamat, no_hp, created_at")
       .single();
     if (error) throw error;
@@ -72,7 +82,12 @@ export const updateCustomer = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("customers")
-      .update(data.data)
+      .update({
+        nama: data.data.nama,
+        kode: data.data.kode,
+        alamat: data.data.alamat,
+        no_hp: data.data.noHp,
+      })
       .eq("id", data.id)
       .eq("user_id", context.userId)
       .select("id, nama, kode, alamat, no_hp, created_at")
