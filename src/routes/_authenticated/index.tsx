@@ -8,7 +8,7 @@ import { Sheet } from "@/components/Sheet";
 import { useCustomers, useCustomerMutations, useSearchCustomers } from "@/lib/data-store";
 import type { Customer } from "@/lib/types";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Dashboard Customer — Our Plastics" },
