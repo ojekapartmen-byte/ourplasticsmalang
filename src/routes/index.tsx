@@ -6,6 +6,7 @@ import { CustomerCard, CustomerRow } from "@/components/CustomerCard";
 import { CustomerForm } from "@/components/CustomerForm";
 import { Sheet } from "@/components/Sheet";
 import { useCustomers, useCustomerMutations, useSearchCustomers } from "@/lib/data-store";
+import type { Customer } from "@/lib/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
