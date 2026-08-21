@@ -22,6 +22,8 @@ export type Customer = {
   alamat: string;
   noHp: string;
   sejak: string;
+  logoUrl?: string | null;  // Ditambahkan untuk URL tampilan logo/thumbnail customer
+  logoPath?: string | null; // Ditambahkan untuk path file di storage
 };
 
 export function formatRupiah(value: number): string {
