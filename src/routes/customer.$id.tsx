@@ -5,7 +5,7 @@ import { OrderListItem } from "@/components/OrderListItem";
 import { CustomerForm } from "@/components/CustomerForm";
 import { OrderForm } from "@/components/OrderForm";
 import { Sheet } from "@/components/Sheet";
-import { useData } from "@/lib/data-store";
+import { useCustomer, useCustomerMutations, useOrderMutations, useOrders } from "@/lib/data-store";
 import { formatRupiah, type Order } from "@/lib/types";
 
 export const Route = createFileRoute("/customer/$id")({
@@ -30,13 +30,22 @@ export const Route = createFileRoute("/customer/$id")({
 function CustomerDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { getCustomer, ordersOf, updateCustomer, deleteCustomer, addOrder, updateOrder, deleteOrder } =
-    useData();
+  const { data: customer, isLoading: loadingCustomer } = useCustomer(id);
+  const { data: orders = [], isLoading: loadingOrders } = useOrders(id);
+  const { update, remove } = useCustomerMutations();
+  const { create, update: updateOrder, remove: deleteOrder } = useOrderMutations(id);
 
-  const customer = getCustomer(id);
   const [editCustomer, setEditCustomer] = useState(false);
   const [orderForm, setOrderForm] = useState<{ open: boolean; order?: Order }>({ open: false });
   const [konfirmasiHapus, setKonfirmasiHapus] = useState(false);
+
+  if (loadingCustomer) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted-foreground">Memuat data customer…</p>
+      </div>
+    );
+  }
 
   if (!customer) {
     return (
@@ -49,8 +58,7 @@ function CustomerDetail() {
     );
   }
 
-  const orders = ordersOf(customer.id);
-  const total = orders.reduce((s, o) => s + o.harga, 0);
+  const total = orders.reduce((s: number, o: Order) => s + o.harga, 0);
 
   return (
     <div className="min-h-screen pb-16">
@@ -99,18 +107,20 @@ function CustomerDetail() {
               <span className="text-xs text-muted-foreground">Total {formatRupiah(total)}</span>
             </div>
 
-            {orders.length === 0 ? (
+            {loadingOrders ? (
+              <p className="text-center text-sm text-muted-foreground">Memuat pesanan…</p>
+            ) : orders.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                 Belum ada pesanan untuk customer ini.
               </p>
             ) : (
               <div className="space-y-4">
-                {orders.map((o) => (
+                {orders.map((o: Order) => (
                   <OrderListItem
                     key={o.id}
                     order={o}
                     onEdit={(order) => setOrderForm({ open: true, order })}
-                    onDelete={(order) => deleteOrder(order.id)}
+                    onDelete={(order) => deleteOrder.mutate(order.id)}
                   />
                 ))}
               </div>
@@ -148,8 +158,8 @@ function CustomerDetail() {
         <CustomerForm
           initial={customer}
           onCancel={() => setEditCustomer(false)}
-          onSubmit={(data) => {
-            updateCustomer(customer.id, data);
+          onSubmit={async (data) => {
+            await update.mutateAsync({ id: customer.id, data });
             setEditCustomer(false);
           }}
         />
@@ -163,9 +173,12 @@ function CustomerDetail() {
         <OrderForm
           initial={orderForm.order}
           onCancel={() => setOrderForm({ open: false })}
-          onSubmit={(data) => {
-            if (orderForm.order) updateOrder(orderForm.order.id, data);
-            else addOrder({ ...data, customerId: customer.id });
+          onSubmit={async (data) => {
+            if (orderForm.order) {
+              await updateOrder.mutateAsync({ id: orderForm.order.id, data });
+            } else {
+              await create.mutateAsync({ ...data, customerId: customer.id });
+            }
             setOrderForm({ open: false });
           }}
         />
@@ -186,8 +199,8 @@ function CustomerDetail() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              deleteCustomer(customer.id);
+            onClick={async () => {
+              await remove.mutateAsync(customer.id);
               navigate({ to: "/" });
             }}
             className="flex-1 rounded-xl bg-danger py-3 text-sm font-bold text-danger-foreground"
