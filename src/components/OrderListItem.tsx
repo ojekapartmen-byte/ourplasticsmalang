@@ -1,6 +1,7 @@
 import { ImageOff, Pencil, Trash2 } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { formatRupiah, type Order } from "@/lib/types";
+import { useProductImageUrl } from "@/hooks/use-product-image-url";
 
 type Props = {
   order: Order;
@@ -9,11 +10,13 @@ type Props = {
 };
 
 export function OrderListItem({ order, onEdit, onDelete }: Props) {
+  const imageUrl = useProductImageUrl(order.imagePath);
+
   return (
     <div className="flex gap-4">
-      {order.imageUrl ? (
+      {imageUrl ? (
         <img
-          src={order.imageUrl}
+          src={imageUrl}
           alt={order.namaProduk}
           loading="lazy"
           width={512}

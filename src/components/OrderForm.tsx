@@ -100,7 +100,7 @@ export function OrderForm({ initial, onSubmit, onCancel }: Props) {
 
       <UploadImageForm
         value={nilai.imageUrl}
-        onChange={(url) => setNilai((p) => ({ ...p, imageUrl: url }))}
+        onChange={(path) => setNilai((p) => ({ ...p, imageUrl: path }))}
       />
 
       <div className="flex gap-3 pt-1">

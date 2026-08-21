@@ -12,6 +12,7 @@ export type Order = {
   status: StatusPembayaran;
   tanggal: string;
   imageUrl: string | null;
+  imagePath?: string | null;
 };
 
 export type Customer = {
@@ -39,4 +40,22 @@ export function inisial(nama: string): string {
     .slice(0, 2)
     .map((w) => w[0]!.toUpperCase())
     .join("");
+}
+
+export function formatSejak(dateInput: string | Date | null): string {
+  if (!dateInput) return "-";
+  const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("id-ID", { month: "short", year: "numeric" });
+}
+
+export function formatTanggal(dateInput: string | Date | null): string {
+  if (!dateInput) return "-";
+  const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }

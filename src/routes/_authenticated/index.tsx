@@ -5,9 +5,10 @@ import { SearchBar } from "@/components/SearchBar";
 import { CustomerCard, CustomerRow } from "@/components/CustomerCard";
 import { CustomerForm } from "@/components/CustomerForm";
 import { Sheet } from "@/components/Sheet";
-import { useData } from "@/lib/data-store";
+import { useCustomers, useCustomerMutations, useSearchCustomers } from "@/lib/data-store";
+import type { Customer } from "@/lib/types";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Dashboard Customer — Our Plastics" },
@@ -27,13 +28,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { customers, search, addCustomer } = useData();
+  const { data: customers = [] } = useCustomers();
+  const { create } = useCustomerMutations();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
 
-  const hasil = useMemo(() => search(query), [search, query]);
+  const { data: searchResults = [] } = useSearchCustomers(query);
   const sedangMencari = query.trim().length > 0;
+
+  const hasil = useMemo(() => (sedangMencari ? searchResults : []), [sedangMencari, searchResults]);
 
   return (
     <div className="min-h-screen pb-28">
@@ -53,7 +57,7 @@ function Home() {
               </p>
             ) : (
               <div className="space-y-3">
-                {hasil.map((c) => (
+                {hasil.map((c: Customer) => (
                   <CustomerRow key={c.id} customer={c} />
                 ))}
               </div>
@@ -66,7 +70,7 @@ function Home() {
                 Pelanggan Terbaru
               </h2>
               <div className="no-scrollbar -mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
-                {customers.slice(0, 6).map((c) => (
+                {customers.slice(0, 6).map((c: Customer) => (
                   <CustomerCard key={c.id} customer={c} />
                 ))}
               </div>
@@ -77,7 +81,7 @@ function Home() {
                 Semua Customer
               </h2>
               <div className="space-y-3">
-                {customers.map((c) => (
+                {customers.map((c: Customer) => (
                   <CustomerRow key={c.id} customer={c} />
                 ))}
               </div>
@@ -98,8 +102,8 @@ function Home() {
       <Sheet open={formOpen} title="Tambah Customer" onClose={() => setFormOpen(false)}>
         <CustomerForm
           onCancel={() => setFormOpen(false)}
-          onSubmit={(data) => {
-            const dibuat = addCustomer(data);
+          onSubmit={async (data) => {
+            const dibuat = await create.mutateAsync(data);
             setFormOpen(false);
             navigate({ to: "/customer/$id", params: { id: dibuat.id } });
           }}
