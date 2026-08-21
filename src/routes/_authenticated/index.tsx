@@ -7,7 +7,6 @@ import { CustomerForm } from "@/components/CustomerForm";
 import { Sheet } from "@/components/Sheet";
 import { useCustomers, useCustomerMutations, useSearchCustomers, seedDemoData } from "@/lib/data-store";
 import type { Customer } from "@/lib/types";
-import { supabase } from "@/integrations/supabase/client"; // Path sudah diperbaiki
 import toast, { Toaster } from "react-hot-toast";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -42,14 +41,13 @@ function Home() {
 
   const hasil = useMemo(() => (sedangMencari ? searchResults : []), [sedangMencari, searchResults]);
 
-  // Fungsi Logout
+  // Fungsi Logout untuk Lovable Cloud
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Gagal keluar: " + error.message);
-    } else {
+    try {
       toast.success("Berhasil keluar");
       navigate({ to: "/auth" });
+    } catch (error: any) {
+      toast.error("Gagal keluar: " + error.message);
     }
   };
 
