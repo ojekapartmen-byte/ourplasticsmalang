@@ -1,0 +1,108 @@
+import peBening from "@/assets/produk-pe-bening.jpg";
+import kantongSampah from "@/assets/produk-kantong-sampah.jpg";
+import tasEco from "@/assets/produk-tas-eco.jpg";
+import type { Customer, Order } from "./types";
+
+export const mockCustomers: Customer[] = [
+  {
+    id: "c1",
+    nama: "Toko Berkah Plastik",
+    kode: "CUST-009",
+    alamat: "Jl. Industri No. 45, Cikarang",
+    noHp: "+62 812-3456-7890",
+    sejak: "Jan 2024",
+  },
+  {
+    id: "c2",
+    nama: "Agus Salim",
+    kode: "CUST-882",
+    alamat: "Jl. Pergudangan Indah No. 12, Semarang",
+    noHp: "+62 813-2211-8890",
+    sejak: "Mar 2024",
+  },
+  {
+    id: "c3",
+    nama: "Rina Diana",
+    kode: "CUST-721",
+    alamat: "Pasar Pagi Blok A/04, Tangerang",
+    noHp: "+62 857-9080-1122",
+    sejak: "Jun 2024",
+  },
+  {
+    id: "c4",
+    nama: "Budi Wahyu",
+    kode: "CUST-104",
+    alamat: "Jl. Raya Bekasi Km 22, Bekasi",
+    noHp: "+62 811-4455-6677",
+    sejak: "Feb 2025",
+  },
+];
+
+export const mockOrders: Order[] = [
+  {
+    id: "o1",
+    customerId: "c1",
+    namaProduk: "Plastik PE Bening 0.5",
+    jumlah: 10,
+    satuan: "Roll",
+    harga: 1500000,
+    status: "Lunas",
+    tanggal: "24 Okt 2025",
+    imageUrl: peBening,
+  },
+  {
+    id: "o2",
+    customerId: "c1",
+    namaProduk: "Kantong Sampah HD Hitam",
+    jumlah: 50,
+    satuan: "Pack",
+    harga: 750000,
+    status: "DP",
+    tanggal: "22 Okt 2025",
+    imageUrl: kantongSampah,
+  },
+  {
+    id: "o3",
+    customerId: "c1",
+    namaProduk: "Tas Belanja Eco Green",
+    jumlah: 100,
+    satuan: "Pcs",
+    harga: 2200000,
+    status: "Belum Lunas",
+    tanggal: "19 Okt 2025",
+    imageUrl: tasEco,
+  },
+  {
+    id: "o4",
+    customerId: "c2",
+    namaProduk: "Plastik PE Bening 0.8",
+    jumlah: 25,
+    satuan: "Bal",
+    harga: 2450000,
+    status: "Lunas",
+    tanggal: "12 Nov 2025",
+    imageUrl: peBening,
+  },
+  {
+    id: "o5",
+    customerId: "c3",
+    namaProduk: "Kantong Sampah HD Hitam Jumbo",
+    jumlah: 30,
+    satuan: "Pack",
+    harga: 980000,
+    status: "DP",
+    tanggal: "02 Des 2025",
+    imageUrl: kantongSampah,
+  },
+  {
+    id: "o6",
+    customerId: "c4",
+    namaProduk: "Tas Belanja Eco Green Large",
+    jumlah: 200,
+    satuan: "Pcs",
+    harga: 3400000,
+    status: "Belum Lunas",
+    tanggal: "18 Des 2025",
+    imageUrl: tasEco,
+  },
+];
