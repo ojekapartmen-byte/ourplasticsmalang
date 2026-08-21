@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as CustomerIdRouteImport } from './routes/customer.$id'
+import { Route as AuthenticatedCustomerIdRouteImport } from './routes/_authenticated/customer.$id'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -22,37 +22,40 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const CustomerIdRoute = CustomerIdRouteImport.update({
+const AuthenticatedCustomerIdRoute = AuthenticatedCustomerIdRouteImport.update({
   id: '/customer/$id',
   path: '/customer/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
-  '/customer/$id': typeof CustomerIdRoute
+  '/customer/$id': typeof AuthenticatedCustomerIdRoute
 }
 export interface FileRoutesByTo {
-  '/customer/$id': typeof CustomerIdRoute
   '/': typeof AuthenticatedIndexRoute
+  '/customer/$id': typeof AuthenticatedCustomerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/customer/$id': typeof CustomerIdRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/customer/$id': typeof AuthenticatedCustomerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/customer/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/customer/$id' | '/'
-  id: '__root__' | '/_authenticated' | '/customer/$id' | '/_authenticated/'
+  to: '/' | '/customer/$id'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/_authenticated/'
+    | '/_authenticated/customer/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  CustomerIdRoute: typeof CustomerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -71,22 +74,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/customer/$id': {
-      id: '/customer/$id'
+    '/_authenticated/customer/$id': {
+      id: '/_authenticated/customer/$id'
       path: '/customer/$id'
       fullPath: '/customer/$id'
-      preLoaderRoute: typeof CustomerIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedCustomerIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCustomerIdRoute: typeof AuthenticatedCustomerIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCustomerIdRoute: AuthenticatedCustomerIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -94,7 +99,6 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  CustomerIdRoute: CustomerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

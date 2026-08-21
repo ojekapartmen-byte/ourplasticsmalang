@@ -8,7 +8,7 @@ import { Sheet } from "@/components/Sheet";
 import { useCustomer, useCustomerMutations, useOrderMutations, useOrders } from "@/lib/data-store";
 import { formatRupiah, type Order } from "@/lib/types";
 
-export const Route = createFileRoute("/customer/$id")({
+export const Route = createFileRoute("/_authenticated/customer/$id")({
   head: () => ({
     meta: [
       { title: "Detail Customer — Our Plastics" },
