@@ -1,27 +1,34 @@
 import { useRef, useState } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
+import { uploadProductImage, deleteProductImage, getProductImageUrl } from "@/lib/storage";
 
 type Props = {
   value: string | null;
-  onChange: (dataUrl: string | null) => void;
+  onChange: (path: string | null) => void;
   label?: string;
 };
 
-/**
- * Komponen upload foto produk.
- * Saat ini menyimpan file sebagai data URL (mock).
- * Untuk menyambungkan ke storage: ganti isi `prosesFile` dengan proses upload
- * dan panggil onChange(publicUrl).
- */
 export function UploadImageForm({ value, onChange, label = "Foto Produk" }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const prosesFile = (file?: File) => {
+  const handleRemove = async () => {
+    await deleteProductImage(value);
+    onChange(null);
+    setPreviewUrl(null);
+  };
+
+  const prosesFile = async (file?: File) => {
     if (!file || !file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => onChange(String(reader.result));
-    reader.readAsDataURL(file);
+    try {
+      const path = await uploadProductImage(file);
+      const url = await getProductImageUrl(path);
+      onChange(path);
+      setPreviewUrl(url);
+    } catch (err) {
+      console.error("Upload gagal:", err);
+    }
   };
 
   return (
@@ -29,10 +36,14 @@ export function UploadImageForm({ value, onChange, label = "Foto Produk" }: Prop
       <label className="mb-1 block text-xs font-semibold text-muted-foreground">{label}</label>
       {value ? (
         <div className="relative overflow-hidden rounded-2xl border border-border">
-          <img src={value} alt="Pratinjau produk" className="h-40 w-full object-cover" />
+          <img
+            src={previewUrl ?? value}
+            alt="Pratinjau produk"
+            className="h-40 w-full object-cover"
+          />
           <button
             type="button"
-            onClick={() => onChange(null)}
+            onClick={handleRemove}
             aria-label="Hapus foto"
             className="absolute top-2 right-2 grid size-8 place-items-center rounded-full bg-contrast text-contrast-foreground"
           >
