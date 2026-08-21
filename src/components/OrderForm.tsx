@@ -12,7 +12,7 @@ type Nilai = {
 };
 
 type Props = {
-  initial?: Order;
+  initial?: Order | undefined;
   onSubmit: (data: Nilai) => void;
   onCancel: () => void;
 };
