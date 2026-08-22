@@ -32,7 +32,7 @@ export function CustomerCard({ customer }: { customer: Customer }) {
       className="w-32 flex-shrink-0 rounded-2xl border border-border bg-surface p-4 shadow-card transition-transform active:scale-[0.98]"
     >
       <div className="mb-3 flex size-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 font-bold text-primary">
-        <CustomerImage url={customer.logoUrl} nama={customer.nama} />
+        <CustomerImage customer={customer} />
       </div>
       <div className="truncate text-sm font-bold">{customer.nama}</div>
       <div className="text-[10px] text-muted-foreground">{customer.kode}</div>
@@ -48,7 +48,7 @@ export function CustomerRow({ customer }: { customer: Customer }) {
       className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 shadow-card transition-transform active:scale-[0.99]"
     >
       <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-sm font-bold text-primary">
-        <CustomerImage url={customer.logoUrl} nama={customer.nama} />
+        <CustomerImage customer={customer} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-bold">{customer.nama}</div>
