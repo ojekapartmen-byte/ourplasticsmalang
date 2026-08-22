@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { ImageIcon, Trash2, Upload } from "lucide-react";
 import type { Customer } from "@/lib/types";
 import { uploadCustomerLogo } from "@/lib/storage";
 import { useProductImageUrl } from "@/hooks/use-product-image-url";
