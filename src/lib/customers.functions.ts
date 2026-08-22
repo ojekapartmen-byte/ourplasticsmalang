@@ -63,8 +63,8 @@ function toCustomerInsert(data: z.infer<typeof customerSchema>, userId: string) 
     kode: data.kode,
     alamat: data.alamat,
     no_hp: data.noHp,
-    logo_url: data.logoUrl,
-    logo_path: data.logoPath,
+    logo_url: data.logoUrl ?? null,
+    logo_path: data.logoPath ?? null,
     user_id: userId,
   };
 }
@@ -95,8 +95,8 @@ export const updateCustomer = createServerFn({ method: "POST" })
         kode: data.data.kode,
         alamat: data.data.alamat,
         no_hp: data.data.noHp,
-        logo_url: data.data.logoUrl,
-        logo_path: data.data.logoPath,
+        logo_url: data.data.logoUrl ?? null,
+        logo_path: data.data.logoPath ?? null,
       })
       .eq("id", data.id)
       .eq("user_id", context.userId)

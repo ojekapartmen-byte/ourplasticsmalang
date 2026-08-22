@@ -28,3 +28,14 @@ export async function deleteProductImage(path: string | null | undefined): Promi
   const { error } = await supabase.storage.from(BUCKET).remove([path]);
   if (error) console.error("Failed to delete image:", error);
 }
+
+export async function uploadCustomerLogo(file: File): Promise<string> {
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `logos/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) throw error;
+  return path;
+}

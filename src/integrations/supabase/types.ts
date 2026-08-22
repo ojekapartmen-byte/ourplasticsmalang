@@ -20,6 +20,8 @@ export type Database = {
           created_at: string
           id: string
           kode: string
+          logo_path: string | null
+          logo_url: string | null
           nama: string
           no_hp: string
           updated_at: string
@@ -30,6 +32,8 @@ export type Database = {
           created_at?: string
           id?: string
           kode: string
+          logo_path?: string | null
+          logo_url?: string | null
           nama: string
           no_hp?: string
           updated_at?: string
@@ -40,6 +44,8 @@ export type Database = {
           created_at?: string
           id?: string
           kode?: string
+          logo_path?: string | null
+          logo_url?: string | null
           nama?: string
           no_hp?: string
           updated_at?: string
