@@ -92,9 +92,9 @@ export function CustomerForm({ initial, onSubmit, onCancel }: Props) {
       <div>
         <label className={labelClass}>Logo / Thumbnail Customer</label>
         <div className="flex items-center gap-4 mt-1">
-          {nilai.logoUrl ? (
+          {previewUrl ? (
             <div className="relative size-14 overflow-hidden rounded-full border border-border bg-surface-muted shrink-0 group">
-              <img src={nilai.logoUrl} alt="Logo Preview" className="size-full object-cover" />
+              <img src={previewUrl} alt="Logo Preview" className="size-full object-cover" />
               <button
                 type="button"
                 onClick={() => setNilai((p) => ({ ...p, logoUrl: null, logoPath: null }))}
