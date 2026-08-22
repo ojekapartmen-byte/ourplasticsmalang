@@ -28,6 +28,12 @@ export function CustomerForm({ initial, onSubmit, onCancel }: Props) {
     logoPath: initial?.logoPath ?? null,
   });
   const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const hapusFoto = () => {
+    setNilai((p) => ({ ...p, logoUrl: null, logoPath: null }));
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   const set = (k: keyof Nilai) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setNilai((p) => ({ ...p, [k]: e.target.value }));
