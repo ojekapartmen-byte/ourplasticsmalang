@@ -2,15 +2,24 @@ import { Link } from "@tanstack/react-router";
 import { inisial, type Customer } from "@/lib/types";
 import { useProductImageUrl } from "@/hooks/use-product-image-url";
 import { useState } from "react";
+import { ImageIcon } from "lucide-react";
 
 // Komponen pembantu untuk menampilkan logo customer (signed URL dari storage privat)
-function CustomerImage({ customer }: { customer: Customer }) {
+export function CustomerImage({ customer }: { customer: Customer }) {
   const [hasError, setHasError] = useState(false);
   const signed = useProductImageUrl(customer.logoPath);
   const url = signed ?? customer.logoUrl ?? null;
 
   if (!url || hasError) {
-    return <>{inisial(customer.nama)}</>;
+    // Placeholder ketika customer belum punya foto/logo
+    return (
+      <span className="flex size-full flex-col items-center justify-center gap-0.5 bg-surface-muted text-muted-foreground">
+        <ImageIcon className="size-3.5" aria-hidden />
+        <span className="text-[9px] leading-none font-bold text-primary">
+          {inisial(customer.nama)}
+        </span>
+      </span>
+    );
   }
 
   return (
