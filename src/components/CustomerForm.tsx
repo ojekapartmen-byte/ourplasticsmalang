@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { Customer } from "@/lib/types";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadCustomerLogo } from "@/lib/storage";
+import { useProductImageUrl } from "@/hooks/use-product-image-url";
 import toast from "react-hot-toast";
+
 
 type Nilai = Omit<Customer, "id" | "sejak">;
 
