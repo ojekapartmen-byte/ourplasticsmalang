@@ -31,38 +31,15 @@ export function CustomerForm({ initial, onSubmit, onCancel }: Props) {
   const set = (k: keyof Nilai) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setNilai((p) => ({ ...p, [k]: e.target.value }));
 
-  // Handler untuk mengunggah file langsung ke Storage backend
+  // Handler untuk mengunggah file langsung ke Storage backend (bucket privat)
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       setUploading(true);
-      const fileExt = file.name.split(".").pop();
-      // PERBAIKAN: Mengubah string(36).substring(2) dengan benar agar tidak error
-      const randomString = Math.random().toString(36).substring(2);
-      const fileName = `${Date.now()}_${randomString}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      // Mengunggah file ke storage bucket "product-images"
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Mendapatkan Public URL dari file yang baru diunggah
-      const { data: publicUrlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath);
-
-      setNilai((p) => ({
-        ...p,
-        logoUrl: publicUrlData.publicUrl,
-        logoPath: filePath,
-      }));
+      const filePath = await uploadCustomerLogo(file);
+      setNilai((p) => ({ ...p, logoUrl: null, logoPath: filePath }));
       toast.success("Logo berhasil diunggah!");
     } catch (error: any) {
       toast.error("Gagal mengunggah logo: " + (error.message || "Terjadi kesalahan"));
@@ -70,6 +47,9 @@ export function CustomerForm({ initial, onSubmit, onCancel }: Props) {
       setUploading(false);
     }
   };
+
+  const previewUrl = useProductImageUrl(nilai.logoPath) ?? nilai.logoUrl;
+
 
   return (
     <form
