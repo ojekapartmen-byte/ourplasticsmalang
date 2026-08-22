@@ -91,32 +91,64 @@ export function CustomerForm({ initial, onSubmit, onCancel }: Props) {
       {/* Input Upload Logo / Thumbnail Customer */}
       <div>
         <label className={labelClass}>Logo / Thumbnail Customer</label>
-        <div className="flex items-center gap-4 mt-1">
+        <div className="mt-1 flex items-center gap-4">
           {previewUrl ? (
-            <div className="relative size-14 overflow-hidden rounded-full border border-border bg-surface-muted shrink-0 group">
-              <img src={previewUrl} alt="Logo Preview" className="size-full object-cover" />
-              <button
-                type="button"
-                onClick={() => setNilai((p) => ({ ...p, logoUrl: null, logoPath: null }))}
-                className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-semibold"
-              >
-                Hapus
-              </button>
+            <div className="size-14 shrink-0 overflow-hidden rounded-full border border-border bg-surface-muted">
+              <img src={previewUrl} alt="Pratinjau logo" className="size-full object-cover" />
             </div>
           ) : (
-            <div className="flex size-14 items-center justify-center rounded-full border border-dashed border-border bg-surface-muted text-muted-foreground text-xs font-medium shrink-0">
-              {uploading ? "..." : "Foto"}
+            <div className="flex size-14 shrink-0 flex-col items-center justify-center gap-0.5 rounded-full border border-dashed border-border bg-surface-muted text-muted-foreground">
+              {uploading ? (
+                <span className="text-xs font-medium">...</span>
+              ) : (
+                <>
+                  <ImageIcon className="size-4" aria-hidden />
+                  <span className="text-[9px] leading-none">Foto</span>
+                </>
+              )}
             </div>
           )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleLogoChange}
-            disabled={uploading}
-            className="text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer w-full"
-          />
+
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+              disabled={uploading}
+              className="hidden"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary disabled:opacity-50"
+              >
+                <Upload className="size-3.5" aria-hidden />
+                {previewUrl ? "Ganti Foto" : "Pilih Foto"}
+              </button>
+              {previewUrl && (
+                <button
+                  type="button"
+                  onClick={hapusFoto}
+                  disabled={uploading}
+                  className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50"
+                >
+                  <Trash2 className="size-3.5" aria-hidden />
+                  Hapus Foto
+                </button>
+              )}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {uploading
+                ? "Sedang mengunggah gambar..."
+                : previewUrl
+                  ? "Perubahan foto tersimpan setelah menekan Simpan."
+                  : "Belum ada foto. Format JPG/PNG."}
+            </p>
+          </div>
         </div>
-        {uploading && <p className="text-[11px] text-primary mt-1">Sedang mengunggah gambar...</p>}
       </div>
 
       <div className="flex gap-3 pt-1">
