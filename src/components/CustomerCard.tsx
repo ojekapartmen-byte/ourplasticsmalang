@@ -1,29 +1,28 @@
 import { Link } from "@tanstack/react-router";
 import { inisial, type Customer } from "@/lib/types";
+import { useProductImageUrl } from "@/hooks/use-product-image-url";
 import { useState } from "react";
 
-// Komponen pembantu untuk menangani loading gambar dengan aman
-function CustomerImage({ url, nama }: { url: string | null | undefined; nama: string }) {
+// Komponen pembantu untuk menampilkan logo customer (signed URL dari storage privat)
+function CustomerImage({ customer }: { customer: Customer }) {
   const [hasError, setHasError] = useState(false);
+  const signed = useProductImageUrl(customer.logoPath);
+  const url = signed ?? customer.logoUrl ?? null;
 
   if (!url || hasError) {
-    return <>{inisial(nama)}</>;
+    return <>{inisial(customer.nama)}</>;
   }
 
-  // Jika URL tidak dimulai dengan http, tambahkan base URL Supabase
-  const fullUrl = url.startsWith("http") 
-    ? url 
-    : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/product-images/${url}`;
-
   return (
-    <img 
-      src={fullUrl} 
-      alt={nama} 
+    <img
+      src={url}
+      alt={customer.nama}
       className="size-full object-cover"
-      onError={() => setHasError(true)} 
+      onError={() => setHasError(true)}
     />
   );
 }
+
 
 export function CustomerCard({ customer }: { customer: Customer }) {
   return (
