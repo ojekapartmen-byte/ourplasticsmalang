@@ -9,6 +9,7 @@ export default defineTool({
   inputSchema: {
     id: z.string().uuid().describe("UUID customer."),
   },
+  outputSchema: undefined,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ id }, ctx) => {
     if (!ctx.isAuthenticated()) {

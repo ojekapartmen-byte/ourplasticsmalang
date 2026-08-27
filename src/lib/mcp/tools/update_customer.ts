@@ -13,6 +13,7 @@ export default defineTool({
     alamat: z.string().optional().describe("Alamat customer."),
     no_hp: z.string().optional().describe("Nomor HP customer."),
   },
+  outputSchema: undefined,
   annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: false, openWorldHint: false },
   handler: async ({ id, nama, kode, alamat, no_hp }, ctx) => {
     if (!ctx.isAuthenticated()) {

@@ -14,6 +14,7 @@ export default defineTool({
     harga: z.number().int().min(0).describe("Harga satuan dalam Rupiah."),
     status: z.enum(["Lunas", "DP", "Belum Lunas"]).describe("Status pembayaran."),
   },
+  outputSchema: undefined,
   annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: false, openWorldHint: false },
   handler: async ({ customer_id, nama_produk, jumlah, satuan, harga, status }, ctx) => {
     if (!ctx.isAuthenticated()) {

@@ -9,6 +9,7 @@ export default defineTool({
   inputSchema: {
     q: z.string().min(1).describe("Kata kunci pencarian."),
   },
+  outputSchema: undefined,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ q }, ctx) => {
     if (!ctx.isAuthenticated()) {

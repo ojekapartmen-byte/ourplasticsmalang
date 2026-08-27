@@ -7,6 +7,7 @@ export default defineTool({
   title: "Ringkasan dashboard",
   description: "Tampilkan ringkasan jumlah customer, total order, dan total nilai penjualan.",
   inputSchema: {},
+  outputSchema: undefined,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) {
