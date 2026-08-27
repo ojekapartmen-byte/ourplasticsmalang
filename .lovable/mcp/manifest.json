@@ -1,0 +1,372 @@
+{
+  "version": 1,
+  "sdk_version": "0.28.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://bycsyykfxeeurqiagiyp.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "plastics-admin-panel",
+      "version": "0.1.0",
+      "title": "Plastics Admin Panel"
+    },
+    "tools": [
+      {
+        "name": "search_customers",
+        "title": "Cari customer",
+        "description": "Cari customer berdasarkan nama, kode, alamat, nomor HP, atau nama produk yang pernah dipesan.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Kata kunci pencarian."
+            }
+          },
+          "required": [
+            "q"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_customer",
+        "title": "Detail customer",
+        "description": "Ambil detail lengkap customer beserta riwayat pesanan berdasarkan ID customer.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID customer."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_customer",
+        "title": "Tambah customer",
+        "description": "Buat customer baru dengan nama, kode, alamat, dan nomor HP.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "nama": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nama customer."
+            },
+            "kode": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Kode customer (unik)."
+            },
+            "alamat": {
+              "type": "string",
+              "default": "",
+              "description": "Alamat customer."
+            },
+            "no_hp": {
+              "type": "string",
+              "default": "",
+              "description": "Nomor HP customer."
+            }
+          },
+          "required": [
+            "nama",
+            "kode"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_customer",
+        "title": "Edit customer",
+        "description": "Perbarui data customer berdasarkan ID. Hanya kirim field yang ingin diubah.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID customer."
+            },
+            "nama": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nama customer."
+            },
+            "kode": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Kode customer."
+            },
+            "alamat": {
+              "type": "string",
+              "description": "Alamat customer."
+            },
+            "no_hp": {
+              "type": "string",
+              "description": "Nomor HP customer."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "delete_customer",
+        "title": "Hapus customer",
+        "description": "Hapus customer beserta seluruh riwayat pesanannya berdasarkan ID.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "destructiveHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID customer."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_orders",
+        "title": "List order customer",
+        "description": "Tampilkan semua pesanan milik satu customer.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID customer."
+            }
+          },
+          "required": [
+            "customer_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_order",
+        "title": "Tambah order",
+        "description": "Buat pesanan baru untuk customer tertentu.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID customer."
+            },
+            "nama_produk": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nama produk."
+            },
+            "jumlah": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Jumlah produk."
+            },
+            "satuan": {
+              "type": "string",
+              "default": "Pcs",
+              "description": "Satuan produk, misalnya Pcs, Kg, Dus."
+            },
+            "harga": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Harga satuan dalam Rupiah."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Lunas",
+                "DP",
+                "Belum Lunas"
+              ],
+              "description": "Status pembayaran."
+            }
+          },
+          "required": [
+            "customer_id",
+            "nama_produk",
+            "jumlah",
+            "harga",
+            "status"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_order",
+        "title": "Edit order",
+        "description": "Perbarui data pesanan berdasarkan ID. Hanya kirim field yang ingin diubah.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID order."
+            },
+            "nama_produk": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Nama produk."
+            },
+            "jumlah": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Jumlah produk."
+            },
+            "satuan": {
+              "type": "string",
+              "description": "Satuan produk."
+            },
+            "harga": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Harga satuan dalam Rupiah."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Lunas",
+                "DP",
+                "Belum Lunas"
+              ],
+              "description": "Status pembayaran."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "delete_order",
+        "title": "Hapus order",
+        "description": "Hapus pesanan berdasarkan ID.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "destructiveHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID order."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_dashboard_summary",
+        "title": "Ringkasan dashboard",
+        "description": "Tampilkan ringkasan jumlah customer, total order, dan total nilai penjualan.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
