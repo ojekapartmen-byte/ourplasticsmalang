@@ -21,10 +21,10 @@ export default defineTool({
     const supabase = supabaseForUser(ctx);
 
     const updateData: Record<string, unknown> = {};
-    if (nama !== undefined) updateData.nama = nama;
-    if (kode !== undefined) updateData.kode = kode;
-    if (alamat !== undefined) updateData.alamat = alamat;
-    if (no_hp !== undefined) updateData.no_hp = no_hp;
+    if (nama !== undefined) updateData["nama"] = nama;
+    if (kode !== undefined) updateData["kode"] = kode;
+    if (alamat !== undefined) updateData["alamat"] = alamat;
+    if (no_hp !== undefined) updateData["no_hp"] = no_hp;
 
     if (Object.keys(updateData).length === 0) {
       throw new ToolError("Tidak ada field yang diberikan untuk diperbarui.");
